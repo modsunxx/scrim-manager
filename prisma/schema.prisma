@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  gamerTag     String       @unique
+  passwordHash String
+  role         String       @default("USER") // USER, ORGANIZER
+  createdAt    DateTime     @default(now())
+  memberships  TeamMember[]
+  tournaments  Tournament[]
+}
+
+model Team {
+  id            String                   @id @default(cuid())
+  name          String                   @unique
+  tag           String                   @db.VarChar(5)
+  inviteCode    String                   @unique @default(cuid())
+  createdAt     DateTime                 @default(now())
+  members       TeamMember[]
+  hostScrims    Scrim[]                  @relation("HostTeam")
+  guestScrims   Scrim[]                  @relation("GuestTeam")
+  matchesAsA    Match[]                  @relation("TeamA")
+  matchesAsB    Match[]                  @relation("TeamB")
+  registrations TournamentRegistration[]
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  userId   String
+  teamId   String
+  role     String   @default("PLAYER") // CAPTAIN, PLAYER, SUB
+  joinedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+}
+
+model Scrim {
+  id          String   @id @default(cuid())
+  hostTeamId  String
+  guestTeamId String?
+  startTime   DateTime
+  endTime     DateTime
+  status      String   @default("OPEN") // OPEN, CONFIRMED, COMPLETED, CANCELLED
+  mapPool     String[]
+  notes       String?
+  createdAt   DateTime @default(now())
+  hostTeam    Team     @relation("HostTeam", fields: [hostTeamId], references: [id])
+  guestTeam   Team?    @relation("GuestTeam", fields: [guestTeamId], references: [id])
+}
+
+model Tournament {
+  id            String                   @id @default(cuid())
+  name          String
+  game          String                   @default("CS2")
+  maxTeams      Int                      @default(8)
+  minPlayers    Int                      @default(1)
+  matchFormat   String                   @default("FINAL_BO3") // ALL_BO1, FINAL_BO3, ALL_BO3
+  status        String                   @default("REGISTRATION") // REGISTRATION, ONGOING, FINISHED
+  organizerId   String?
+  organizer     User?                    @relation(fields: [organizerId], references: [id])
+  createdAt     DateTime                 @default(now())
+  registrations TournamentRegistration[]
+  matches       Match[]
+}
+
+model TournamentRegistration {
+  id           String     @id @default(cuid())
+  tournamentId String
+  teamId       String
+  registeredAt DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, teamId])
+}
+
+model Match {
+  id           String     @id @default(cuid())
+  tournamentId String
+  round        Int
+  position     Int
+  bestOf       Int        @default(1) // 1 = BO1, 3 = BO3
+  teamAId      String?
+  teamBId      String?
+  scoreA       Int        @default(0)
+  scoreB       Int        @default(0)
+  winnerId     String?
+  nextMatchId  String?
+  mapPool      String[]   @default(["Mirage", "Inferno", "Nuke", "Ancient", "Anubis", "Dust2", "Vertigo"])
+  bannedMaps   String[]   @default([])
+  pickedMaps   String[]   @default([])
+  vetoLog      Json       @default("[]")
+  lobbyInfo    String?
+  nextMatch    Match?     @relation("BracketTree", fields: [nextMatchId], references: [id])
+  prevMatches  Match[]    @relation("BracketTree")
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamA        Team?      @relation("TeamA", fields: [teamAId], references: [id])
+  teamB        Team?      @relation("TeamB", fields: [teamBId], references: [id])
+}
