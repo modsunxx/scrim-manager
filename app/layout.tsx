@@ -1,31 +1,33 @@
-import { ImageResponse } from "next/og";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
-export const size = {
-  width: 32,
-  height: 32,
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: "Scrim & Bracket Manager | E-Sports Platform",
+    template: "%s | Scrim & Bracket Manager",
+  },
+  description:
+    "แพลตฟอร์มจัดการทีม E-Sports นัดซ้อม Scrim สร้างสายการแข่งขัน และ Live Map Veto",
 };
-export const contentType = "image/png";
 
-export default function Icon() {
-  return new ImageResponse(
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #09090b 0%, #064e3b 100%)",
-        border: "2px solid #10b981",
-        borderRadius: "8px",
-        color: "#34d399",
-        fontSize: "16px",
-        fontWeight: 900,
-        letterSpacing: "-0.05em",
-      }}
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      SB
-    </div>,
-    { ...size },
+      <body className="min-h-full flex flex-col">{children}</body>
+    </html>
   );
 }
