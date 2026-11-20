@@ -68,39 +68,127 @@ export default async function TournamentsPage() {
       memberCount: t._count.members,
     }));
 
-  return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 py-10 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div>
-            <Link
-              href="/"
-              className="text-xs text-zinc-400 hover:text-white transition"
-            >
-              ← กลับหน้าหลัก
-            </Link>
-            <h1 className="text-3xl font-bold tracking-tight text-white mt-1">
-              Tournaments & Brackets
-            </h1>
-            <p className="text-zinc-400 text-sm mt-1">
-              สมัครเข้าร่วมการแข่งขัน ตรวจสอบสายแข่ง และเข้าห้อง Map Veto
-              ของแต่ละแมตช์
-            </p>
-          </div>
+  const activeTournamentsCount = tournaments.filter(
+    (t) => t.status !== "FINISHED",
+  ).length;
 
+  return (
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      {/* ── TOP NAV BAR ─────────────────────────────────────────── */}
+      <div className="border-b border-zinc-800 px-6 py-2 flex items-center justify-between">
+        <Link
+          href="/"
+          className="font-mono text-xs text-zinc-500 hover:text-zinc-300 tracking-widest uppercase transition-colors"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          ← SBM·HOME
+        </Link>
+        <div className="flex items-center gap-4">
+          <span
+            className="font-mono text-[10px] text-zinc-600 tracking-widest uppercase"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            MODULE // 03 · TOURNAMENTS &amp; BRACKETS
+          </span>
           <LiveSync
             active={hasActiveTournament}
             intervalMs={3500}
-            label="Live Bracket Updates"
+            label="Live Updates"
           />
         </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto px-6">
+        {/* ── HEADER & TELEMETRY ──────────────────────────────────── */}
+        <div className="pt-8 pb-6">
+          <h1 className="text-3xl font-bold tracking-tight text-white leading-tight">
+            Tournaments &amp; <span className="text-amber-400">Brackets</span>
+          </h1>
+          <p className="mt-2 text-xs text-zinc-500 max-w-lg leading-relaxed">
+            สมัครเข้าแข่งขัน ตรวจสอบสายแข่ง Bracket และเข้าห้อง Live Map Veto
+          </p>
+        </div>
+
+        {/* Telemetry Row */}
+        <div className="py-4 border-y border-zinc-800 grid grid-cols-3 gap-0 divide-x divide-zinc-800 mb-8">
+          <div className="pr-6">
+            <span
+              className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 block mb-0.5"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Tournaments
+            </span>
+            <span
+              className="font-mono text-xl font-bold text-white tabular-nums"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {tournaments.length}
+            </span>
+          </div>
+          <div className="px-6">
+            <span
+              className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 block mb-0.5"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Active Events
+            </span>
+            <span
+              className="font-mono text-xl font-bold text-amber-400 tabular-nums"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {activeTournamentsCount}
+            </span>
+          </div>
+          <div className="pl-6">
+            <span
+              className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 block mb-0.5"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              My Eligible Teams
+            </span>
+            <span
+              className="font-mono text-xl font-bold text-cyan-400 tabular-nums"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {currentUser ? captainTeams.length : "—"}
+            </span>
+          </div>
+        </div>
+
+        {/* ── ORGANIZER FORM ──────────────────────────────────────── */}
         <CreateTournamentForm isOrganizer={isOrganizer} />
 
-        <div className="space-y-10">
+        {/* ── TOURNAMENT DIRECTORY ─────────────────────────────────── */}
+        <div className="pb-12 space-y-8">
+          <div className="flex items-center gap-3">
+            <span
+              className="font-mono text-[10px] font-semibold tracking-[0.18em] uppercase text-zinc-500"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Official Tournament Circuit
+            </span>
+            <div className="flex-1 h-px bg-zinc-800" />
+            <span
+              className="font-mono text-[10px] text-zinc-600 tracking-widest"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              EVENTS: {tournaments.length}
+            </span>
+          </div>
+
           {tournaments.length === 0 ? (
-            <div className="bg-zinc-900/50 border border-dashed border-zinc-800 rounded-xl p-8 text-center text-zinc-500 text-sm">
-              ยังไม่มีรายการแข่งขันในขณะนี้
+            <div className="border border-dashed border-zinc-800 p-8 text-center">
+              <span
+                className="font-mono text-xs text-zinc-600 uppercase tracking-widest block"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                No active tournaments
+              </span>
+              <p className="text-xs text-zinc-600 mt-1">
+                {isOrganizer
+                  ? "เปิดรับสมัครทัวร์นาเมนต์แรกได้จากฟอร์ม Organizer ด้านบน"
+                  : "รอผู้จัดเปิดรับสมัครรายการใหม่"}
+              </p>
             </div>
           ) : (
             tournaments.map((tournament) => {
@@ -123,46 +211,61 @@ export default async function TournamentsPage() {
               return (
                 <section
                   key={tournament.id}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6"
+                  className="border border-zinc-800 bg-zinc-900/30 p-6 space-y-6"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+                  {/* Tournament Meta Header */}
+                  <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-zinc-800/80">
                     <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <span
+                          className="font-mono text-[9px] font-bold text-amber-400 border border-amber-500/30 bg-amber-950/20 px-1.5 py-0.5 uppercase tracking-wider"
+                          style={{ fontFamily: "var(--font-geist-mono)" }}
+                        >
                           {tournament.game}
                         </span>
-                        <span className="text-xs font-medium bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded">
+                        <span
+                          className="font-mono text-[9px] text-zinc-400 border border-zinc-800 px-1.5 py-0.5 uppercase tracking-wider"
+                          style={{ fontFamily: "var(--font-geist-mono)" }}
+                        >
                           {getFormatLabel(tournament.matchFormat)}
                         </span>
                         <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                          className={`font-mono text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border ${
                             tournament.status === "REGISTRATION"
-                              ? "bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                              ? "border-amber-500/40 bg-amber-950/20 text-amber-300"
                               : tournament.status === "FINISHED"
-                                ? "bg-emerald-500/10 text-emerald-400"
-                                : "bg-indigo-500/10 text-indigo-400"
+                                ? "border-zinc-800 bg-zinc-900 text-zinc-500"
+                                : "border-cyan-500/40 bg-cyan-950/20 text-cyan-300"
                           }`}
+                          style={{ fontFamily: "var(--font-geist-mono)" }}
                         >
                           {tournament.status}
                         </span>
                         {tournament.organizer && (
-                          <span className="text-xs text-zinc-500">
-                            จัดโดย {tournament.organizer.gamerTag}
+                          <span
+                            className="font-mono text-[10px] text-zinc-600"
+                            style={{ fontFamily: "var(--font-geist-mono)" }}
+                          >
+                            ORG // {tournament.organizer.gamerTag}
                           </span>
                         )}
                       </div>
-                      <h2 className="text-2xl font-bold text-white mt-1">
+
+                      <h2 className="text-xl font-bold text-white">
                         {tournament.name}
                       </h2>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {championTeam && (
-                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 text-right">
-                          <span className="text-[11px] uppercase tracking-wider text-amber-400 block">
-                            Champion
+                        <div className="border border-amber-500/40 bg-amber-950/20 px-3.5 py-1.5 text-right">
+                          <span
+                            className="font-mono text-[9px] uppercase tracking-widest text-amber-400 block"
+                            style={{ fontFamily: "var(--font-geist-mono)" }}
+                          >
+                            🏆 CHAMPION
                           </span>
-                          <span className="text-base font-bold text-white">
+                          <span className="text-sm font-bold text-white">
                             [{championTeam.tag}] {championTeam.name}
                           </span>
                         </div>
@@ -174,6 +277,7 @@ export default async function TournamentsPage() {
                     </div>
                   </div>
 
+                  {/* Body: Registration or Bracket */}
                   {tournament.status === "REGISTRATION" ? (
                     <TournamentRegistrationBox
                       tournamentId={tournament.id}
@@ -192,7 +296,7 @@ export default async function TournamentsPage() {
                     <div
                       className={`grid grid-cols-1 ${
                         totalRounds === 2 ? "md:grid-cols-2" : "md:grid-cols-3"
-                      } gap-6 overflow-x-auto`}
+                      } gap-4 overflow-x-auto`}
                     >
                       {rounds.map((round) => {
                         const roundMatches = tournament.matches.filter(
@@ -200,12 +304,15 @@ export default async function TournamentsPage() {
                         );
 
                         return (
-                          <div key={round} className="flex flex-col space-y-3">
-                            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                          <div key={round} className="space-y-3">
+                            <span
+                              className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500 block"
+                              style={{ fontFamily: "var(--font-geist-mono)" }}
+                            >
                               {getRoundLabel(round, totalRounds)}
-                            </h3>
+                            </span>
 
-                            <div className="flex-1 flex flex-col justify-around gap-4">
+                            <div className="flex flex-col gap-3">
                               {roundMatches.map((match) => {
                                 const isReady = Boolean(
                                   match.teamAId && match.teamBId,
@@ -216,81 +323,117 @@ export default async function TournamentsPage() {
                                 return (
                                   <div
                                     key={match.id}
-                                    className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 space-y-1.5"
+                                    className="border border-zinc-800 bg-zinc-950 p-3 space-y-2"
                                   >
+                                    {/* Team A */}
                                     <div
-                                      className={`flex items-center justify-between px-2 py-1 rounded text-xs ${
+                                      className={`flex items-center justify-between px-2 py-1 text-xs border ${
                                         match.winnerId &&
                                         match.winnerId === match.teamAId
-                                          ? "bg-emerald-500/15 text-emerald-300 font-bold"
-                                          : "text-zinc-300"
+                                          ? "border-cyan-500/40 bg-cyan-950/20 text-white font-bold"
+                                          : "border-transparent text-zinc-300"
                                       }`}
                                     >
                                       <span className="truncate">
                                         {match.teamA ? (
                                           <>
-                                            <span className="text-zinc-500 mr-1">
+                                            <span
+                                              className="font-mono text-cyan-400 mr-1.5"
+                                              style={{
+                                                fontFamily:
+                                                  "var(--font-geist-mono)",
+                                              }}
+                                            >
                                               [{match.teamA.tag}]
                                             </span>
                                             {match.teamA.name}
                                           </>
                                         ) : (
-                                          <span className="text-zinc-600 italic">
+                                          <span className="font-mono text-zinc-600 italic">
                                             TBD
                                           </span>
                                         )}
                                       </span>
-                                      <span className="font-mono ml-2">
-                                        {match.winnerId ? match.scoreA : "-"}
+                                      <span
+                                        className="font-mono font-bold ml-2 tabular-nums"
+                                        style={{
+                                          fontFamily:
+                                            "var(--font-geist-mono)",
+                                        }}
+                                      >
+                                        {match.winnerId ? match.scoreA : "—"}
                                       </span>
                                     </div>
 
+                                    {/* Team B */}
                                     <div
-                                      className={`flex items-center justify-between px-2 py-1 rounded text-xs ${
+                                      className={`flex items-center justify-between px-2 py-1 text-xs border ${
                                         match.winnerId &&
                                         match.winnerId === match.teamBId
-                                          ? "bg-emerald-500/15 text-emerald-300 font-bold"
-                                          : "text-zinc-300"
+                                          ? "border-cyan-500/40 bg-cyan-950/20 text-white font-bold"
+                                          : "border-transparent text-zinc-300"
                                       }`}
                                     >
                                       <span className="truncate">
                                         {match.teamB ? (
                                           <>
-                                            <span className="text-zinc-500 mr-1">
+                                            <span
+                                              className="font-mono text-cyan-400 mr-1.5"
+                                              style={{
+                                                fontFamily:
+                                                  "var(--font-geist-mono)",
+                                              }}
+                                            >
                                               [{match.teamB.tag}]
                                             </span>
                                             {match.teamB.name}
                                           </>
                                         ) : (
-                                          <span className="text-zinc-600 italic">
+                                          <span className="font-mono text-zinc-600 italic">
                                             TBD
                                           </span>
                                         )}
                                       </span>
-                                      <span className="font-mono ml-2">
-                                        {match.winnerId ? match.scoreB : "-"}
+                                      <span
+                                        className="font-mono font-bold ml-2 tabular-nums"
+                                        style={{
+                                          fontFamily:
+                                            "var(--font-geist-mono)",
+                                        }}
+                                      >
+                                        {match.winnerId ? match.scoreB : "—"}
                                       </span>
                                     </div>
 
+                                    {/* Match room link & format */}
                                     {isReady && (
-                                      <div className="pt-1 flex items-center justify-between text-[11px] gap-2">
-                                        <span className="text-zinc-500 truncate">
-                                          <strong className="text-zinc-400 mr-1">
-                                            BO{match.bestOf}
-                                          </strong>
+                                      <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[11px] gap-2">
+                                        <span
+                                          className="font-mono text-[10px] text-zinc-500 truncate"
+                                          style={{
+                                            fontFamily:
+                                              "var(--font-geist-mono)",
+                                          }}
+                                        >
+                                          BO{match.bestOf}
                                           {match.pickedMaps.length > 0
-                                            ? `• ${match.pickedMaps.join(", ")}`
-                                            : `• Veto (${match.bannedMaps.length} banned)`}
+                                            ? ` · ${match.pickedMaps.join(", ")}`
+                                            : ` · Veto (${match.bannedMaps.length} banned)`}
                                         </span>
                                         <Link
                                           href={`/matches/${match.id}`}
-                                          className="text-indigo-400 hover:text-indigo-300 font-medium shrink-0"
+                                          className="font-mono text-[10px] text-cyan-400 hover:text-cyan-300 uppercase tracking-wider font-semibold transition-colors shrink-0"
+                                          style={{
+                                            fontFamily:
+                                              "var(--font-geist-mono)",
+                                          }}
                                         >
-                                          ห้องแข่งขัน / Veto →
+                                          [ VETO ROOM → ]
                                         </Link>
                                       </div>
                                     )}
 
+                                    {/* Organizer quick score */}
                                     {canSubmit && (
                                       <MatchScoreForm matchId={match.id} />
                                     )}
@@ -307,6 +450,22 @@ export default async function TournamentsPage() {
               );
             })
           )}
+        </div>
+
+        {/* ── FOOTER ──────────────────────────────────────────────── */}
+        <div className="border-t border-zinc-800 py-4 flex items-center justify-between">
+          <span
+            className="font-mono text-[10px] text-zinc-700 tracking-widest uppercase"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            Scrim &amp; Bracket Manager · Tournaments
+          </span>
+          <span
+            className="font-mono text-[10px] text-zinc-700"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            {new Date().getFullYear()}
+          </span>
         </div>
       </div>
     </main>

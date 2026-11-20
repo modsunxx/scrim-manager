@@ -7,3 +7,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Design & UI Guidelines
+
+- When creating or modifying any UI, components, or styling, strictly follow the rules and workflows defined in `.devin/skills/impeccable/SKILL.md`.
+- Avoid generic "AI slop" layouts (uniform flat cards, excessive glow/neon borders, poor typographic hierarchy). Aim for high-contrast, tactical E-Sports telemetry aesthetics.

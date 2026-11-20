@@ -29,8 +29,14 @@ export function LiveSync({
   if (!active) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+    <span
+      className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold tracking-[0.18em] uppercase text-rose-400"
+      style={{ fontFamily: "var(--font-geist-mono)" }}
+    >
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-70" />
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-400" />
+      </span>
       {label}
     </span>
   );

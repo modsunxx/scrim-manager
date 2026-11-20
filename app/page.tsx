@@ -9,6 +9,57 @@ function formatDateTime(date: Date) {
   }).format(date);
 }
 
+/** Thin horizontal divider used between HUD sections */
+function HudDivider() {
+  return <div className="h-px bg-zinc-800 w-full" />;
+}
+
+/** Uppercase tracked section label — craft-floor ban on kicker above h1 only; labels inside a section are fine */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[10px] font-semibold tracking-[0.18em] uppercase text-zinc-500 select-none">
+      {children}
+    </span>
+  );
+}
+
+/** Stat block: label above, big mono number below */
+function StatCell({
+  label,
+  value,
+  accent = false,
+}: {
+  label: string;
+  value: number | string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5 min-w-0">
+      <SectionLabel>{label}</SectionLabel>
+      <span
+        className={`font-mono text-2xl font-bold leading-none tabular-nums tracking-tight ${
+          accent ? "text-cyan-400" : "text-white"
+        }`}
+        style={{ fontFamily: "var(--font-geist-mono)" }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/** Role badge — inline, no pill shape */
+function RoleBadge({ role }: { role: string }) {
+  return (
+    <span
+      className="font-mono text-[10px] font-medium uppercase tracking-widest text-zinc-500"
+      style={{ fontFamily: "var(--font-geist-mono)" }}
+    >
+      {role}
+    </span>
+  );
+}
+
 export default async function HomePage() {
   const [currentUser, teamCount, openScrimCount, tournamentCount] =
     await Promise.all([
@@ -18,7 +69,6 @@ export default async function HomePage() {
       prisma.tournament.count(),
     ]);
 
-  // ดึงคิวซ้อมที่ยืนยันแล้วของทีมที่ผู้ใช้สังกัดอยู่
   const myTeamIds = currentUser?.memberships.map((m) => m.teamId) ?? [];
   const myConfirmedScrims =
     myTeamIds.length > 0
@@ -40,195 +90,275 @@ export default async function HomePage() {
       : [];
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 py-12 px-4">
-      <div className="max-w-5xl mx-auto space-y-10">
-        {/* Header */}
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-              E-Sports Management Platform
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      {/* ── TOP STATUS BAR ──────────────────────────────────────── */}
+      <div className="border-b border-zinc-800 px-6 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Pulse indicator */}
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
+          </span>
+          <span
+            className="font-mono text-xs font-medium text-zinc-400 tracking-widest uppercase"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            SBM·HUD·v1
+          </span>
+        </div>
+        <div className="flex items-center gap-6">
+          {currentUser ? (
+            <span
+              className="font-mono text-xs text-zinc-400"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              <span className="text-cyan-400">{"//"}</span>{" "}
+              {currentUser.gamerTag}
             </span>
-            <h1 className="text-4xl font-bold tracking-tight text-white pt-2">
-              {currentUser
-                ? `ยินดีต้อนรับ, ${currentUser.gamerTag}`
-                : "Scrim & Bracket Manager"}
-            </h1>
-            <p className="text-zinc-400 max-w-2xl text-sm">
-              ระบบจัดการทีม แชร์โค้ดชวนเพื่อนเข้า Roster นัดซ้อมแข่ง (Scrim)
-              และรันสายการแข่งขันอัตโนมัติ
-            </p>
-          </div>
-
-          {!currentUser && (
+          ) : (
             <Link
               href="/login"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
+              className="font-mono text-xs text-cyan-400 hover:text-cyan-300 tracking-widest uppercase transition-colors"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
             >
-              เข้าสู่ระบบ / สมัครสมาชิก →
+              [ เข้าสู่ระบบ ]
             </Link>
           )}
         </div>
+      </div>
 
-        {/* ส่วนแสดงข้อมูลส่วนตัวเมื่อ Login แล้ว */}
+      <div className="max-w-5xl mx-auto px-6">
+        {/* ── MAIN HEADER ─────────────────────────────────────────── */}
+        <div className="pt-10 pb-8">
+          <h1 className="text-4xl font-bold tracking-tight text-white leading-none">
+            Scrim &amp; Bracket
+            <br />
+            <span className="text-cyan-400">Manager</span>
+          </h1>
+          <p className="mt-3 text-sm text-zinc-500 max-w-sm leading-relaxed">
+            จัดการทีม · นัดซ้อม Scrim · รันสายการแข่งขันอัตโนมัติ
+          </p>
+        </div>
+
+        <HudDivider />
+
+        {/* ── PLATFORM TELEMETRY ──────────────────────────────────── */}
+        <div className="py-5 grid grid-cols-3 gap-0 divide-x divide-zinc-800">
+          <div className="pr-8">
+            <StatCell label="Teams Registered" value={teamCount} accent />
+          </div>
+          <div className="px-8">
+            <StatCell label="Open Scrims" value={openScrimCount} accent />
+          </div>
+          <div className="pl-8">
+            <StatCell label="Tournaments" value={tournamentCount} accent />
+          </div>
+        </div>
+
+        <HudDivider />
+
+        {/* ── MODULE NAVIGATION ───────────────────────────────────── */}
+        <div className="py-5">
+          <SectionLabel>Modules</SectionLabel>
+          <div className="mt-3 flex flex-col gap-px">
+            <NavRow
+              href="/teams"
+              code="01"
+              title="Teams &amp; Roster"
+              desc="สร้างทีม จัดการ Roster คัดลอก Invite Code"
+              accentClass="text-cyan-400"
+              hoverBorderClass="hover:border-cyan-500/40"
+            />
+            <NavRow
+              href="/scrims"
+              code="02"
+              title="Scrim Finder"
+              desc="ลงประกาศหาคู่ซ้อม เลือก Map Pool เช็กเวลาซ้ำซ้อน"
+              accentClass="text-violet-400"
+              hoverBorderClass="hover:border-violet-500/40"
+            />
+            <NavRow
+              href="/tournaments"
+              code="03"
+              title="Bracket Manager"
+              desc="Single Elimination · บันทึกผลสกอร์ · ดันผู้ชนะอัตโนมัติ"
+              accentClass="text-amber-400"
+              hoverBorderClass="hover:border-amber-500/40"
+            />
+          </div>
+        </div>
+
+        {/* ── PERSONAL FEED (authed only) ─────────────────────────── */}
         {currentUser && (
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* ทีมของฉัน */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-white">
-                  ทีมที่คุณสังกัด ({currentUser.memberships.length})
-                </h2>
-                <Link
-                  href="/teams"
-                  className="text-xs text-emerald-400 hover:underline"
-                >
-                  + สร้าง / จอยทีม
-                </Link>
+          <>
+            <HudDivider />
+            <div className="py-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* MY TEAMS */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <SectionLabel>
+                    My Teams ({currentUser.memberships.length})
+                  </SectionLabel>
+                  <Link
+                    href="/teams"
+                    className="font-mono text-[10px] text-cyan-400 hover:text-cyan-300 uppercase tracking-widest transition-colors"
+                    style={{ fontFamily: "var(--font-geist-mono)" }}
+                  >
+                    + Create / Join
+                  </Link>
+                </div>
+
+                {currentUser.memberships.length === 0 ? (
+                  <EmptyState message="คุณยังไม่ได้สังกัดทีมใด" />
+                ) : (
+                  <ul className="flex flex-col gap-px">
+                    {currentUser.memberships.map((m) => (
+                      <li key={m.id}>
+                        <Link
+                          href={`/teams/${m.team.id}`}
+                          className="group flex items-center justify-between border border-zinc-800/60 hover:border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900 px-4 py-2.5 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className="font-mono text-xs font-bold text-cyan-400 shrink-0"
+                              style={{ fontFamily: "var(--font-geist-mono)" }}
+                            >
+                              [{m.team.tag}]
+                            </span>
+                            <span className="text-sm font-medium text-zinc-200 group-hover:text-white truncate transition-colors">
+                              {m.team.name}
+                            </span>
+                          </div>
+                          <RoleBadge role={m.role} />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
-              {currentUser.memberships.length === 0 ? (
-                <p className="text-xs text-zinc-500 py-4">
-                  คุณยังไม่ได้สังกัดทีมใด กดไปที่เมนู Teams เพื่อสร้างทีมหรือใส่
-                  Invite Code
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {currentUser.memberships.map((m) => (
-                    <li
-                      key={m.id}
-                      className="flex items-center justify-between bg-zinc-950 border border-zinc-800/80 rounded-lg px-3.5 py-2.5 text-xs"
-                    >
-                      <Link
-                        href={`/teams/${m.team.id}`}
-                        className="group flex items-center"
+              {/* CONFIRMED SCRIMS */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <SectionLabel>
+                    Confirmed Scrims ({myConfirmedScrims.length})
+                  </SectionLabel>
+                  <Link
+                    href="/scrims"
+                    className="font-mono text-[10px] text-violet-400 hover:text-violet-300 uppercase tracking-widest transition-colors"
+                    style={{ fontFamily: "var(--font-geist-mono)" }}
+                  >
+                    View Schedule →
+                  </Link>
+                </div>
+
+                {myConfirmedScrims.length === 0 ? (
+                  <EmptyState message="ยังไม่มีนัดซ้อมที่ยืนยัน" />
+                ) : (
+                  <ul className="flex flex-col gap-px">
+                    {myConfirmedScrims.map((scrim) => (
+                      <li
+                        key={scrim.id}
+                        className="border border-zinc-800/60 bg-zinc-900/50 px-4 py-2.5 flex items-center justify-between"
                       >
-                        <span className="text-emerald-400 font-bold mr-1.5">
-                          [{m.team.tag}]
+                        <span
+                          className="font-mono text-xs font-semibold text-zinc-200"
+                          style={{ fontFamily: "var(--font-geist-mono)" }}
+                        >
+                          [{scrim.hostTeam.tag}]{" "}
+                          <span className="text-zinc-500">vs</span> [
+                          {scrim.guestTeam?.tag ?? "TBD"}]
                         </span>
-                        <span className="text-zinc-200 font-medium group-hover:text-emerald-400 transition">
-                          {m.team.name}
+                        <span
+                          className="font-mono text-[10px] text-zinc-500 tabular-nums shrink-0 ml-3"
+                          style={{ fontFamily: "var(--font-geist-mono)" }}
+                        >
+                          {formatDateTime(scrim.startTime)}
                         </span>
-                      </Link>
-                      <span className="text-[10px] text-zinc-500">
-                        {m.role}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* คิวซ้อมที่กำลังจะมาถึง */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-white">
-                  คิวซ้อมที่ยืนยันแล้ว ({myConfirmedScrims.length})
-                </h2>
-                <Link
-                  href="/scrims"
-                  className="text-xs text-indigo-400 hover:underline"
-                >
-                  ดูตารางซ้อม →
-                </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-
-              {myConfirmedScrims.length === 0 ? (
-                <p className="text-xs text-zinc-500 py-4">
-                  ยังไม่มีนัดซ้อมที่ยืนยันในขณะนี้
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {myConfirmedScrims.map((scrim) => (
-                    <li
-                      key={scrim.id}
-                      className="flex items-center justify-between bg-zinc-950 border border-zinc-800/80 rounded-lg px-3 py-2 text-xs"
-                    >
-                      <span className="text-zinc-200 font-medium">
-                        [{scrim.hostTeam.tag}] vs [{scrim.guestTeam?.tag}]
-                      </span>
-                      <span className="text-zinc-400">
-                        {formatDateTime(scrim.startTime)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
-          </section>
+          </>
         )}
 
-        {/* เมนูหลัก 3 โมดูล */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            href="/teams"
-            className="group bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 rounded-xl p-6 transition flex flex-col justify-between space-y-6"
+        {/* ── FOOTER ──────────────────────────────────────────────── */}
+        <HudDivider />
+        <div className="py-4 flex items-center justify-between">
+          <span
+            className="font-mono text-[10px] text-zinc-600 tracking-widest uppercase"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
           >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-emerald-400">
-                  ทีมทั้งหมด
-                </span>
-                <span className="text-2xl font-bold text-white">
-                  {teamCount}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-white group-hover:text-emerald-400 transition">
-                Teams & Roster →
-              </h2>
-              <p className="text-sm text-zinc-400">
-                สร้างทีมใหม่ จัดการตำแหน่งผู้เล่น และคัดลอก Invite Code
-                ส่งให้เพื่อนเข้าทีม
-              </p>
-            </div>
-          </Link>
-
-          <Link
-            href="/scrims"
-            className="group bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 rounded-xl p-6 transition flex flex-col justify-between space-y-6"
+            Scrim &amp; Bracket Manager
+          </span>
+          <span
+            className="font-mono text-[10px] text-zinc-700"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
           >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-indigo-400">
-                  ห้องซ้อมที่เปิดอยู่
-                </span>
-                <span className="text-2xl font-bold text-white">
-                  {openScrimCount}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-white group-hover:text-indigo-400 transition">
-                Scrim Finder →
-              </h2>
-              <p className="text-sm text-zinc-400">
-                ลงประกาศหาคู่ซ้อม เลือก Map Pool
-                และกดรับคำท้าพร้อมระบบเช็กเวลาซ้ำซ้อน
-              </p>
-            </div>
-          </Link>
-
-          <Link
-            href="/tournaments"
-            className="group bg-zinc-900 border border-zinc-800 hover:border-amber-500/50 rounded-xl p-6 transition flex flex-col justify-between space-y-6"
-          >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-amber-400">
-                  ทัวร์นาเมนต์
-                </span>
-                <span className="text-2xl font-bold text-white">
-                  {tournamentCount}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-white group-hover:text-amber-400 transition">
-                Bracket Manager →
-              </h2>
-              <p className="text-sm text-zinc-400">
-                สร้างสายการแข่งขัน Single Elimination
-                บันทึกผลสกอร์และดันผู้ชนะเข้ารอบอัตโนมัติ
-              </p>
-            </div>
-          </Link>
+            {new Date().getFullYear()}
+          </span>
         </div>
       </div>
     </main>
+  );
+}
+
+/* ─── Sub-components ──────────────────────────────────────────────────────── */
+
+function NavRow({
+  href,
+  code,
+  title,
+  desc,
+  accentClass,
+  hoverBorderClass,
+}: {
+  href: string;
+  code: string;
+  title: string;
+  desc: string;
+  accentClass: string;
+  hoverBorderClass: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center gap-5 border border-zinc-800/60 ${hoverBorderClass} bg-zinc-900/30 hover:bg-zinc-900 px-5 py-4 transition-colors`}
+    >
+      {/* Module index */}
+      <span
+        className={`font-mono text-xs font-bold ${accentClass} w-5 shrink-0 tabular-nums`}
+        style={{ fontFamily: "var(--font-geist-mono)" }}
+        aria-hidden="true"
+      >
+        {code}
+      </span>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
+            <span dangerouslySetInnerHTML={{ __html: title }} />
+          </h2>
+          <span
+            className={`font-mono text-xs ${accentClass} opacity-0 group-hover:opacity-100 transition-opacity`}
+            aria-hidden="true"
+          >
+            →
+          </span>
+        </div>
+        <p className="text-xs text-zinc-500 mt-0.5 truncate">{desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="border border-dashed border-zinc-800 px-4 py-5 text-center">
+      <span className="text-xs text-zinc-600">{message}</span>
+    </div>
   );
 }

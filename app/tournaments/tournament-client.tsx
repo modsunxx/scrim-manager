@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   createTournament,
   deleteTournament,
@@ -26,6 +26,7 @@ export function CreateTournamentForm({
 }: {
   isOrganizer: boolean;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const [state, action, isPending] = useActionState(
     createTournament,
     initialState,
@@ -34,88 +35,119 @@ export function CreateTournamentForm({
   if (!isOrganizer) return null;
 
   return (
-    <form
-      action={action}
-      className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-5 mb-10"
-    >
-      <h2 className="text-lg font-semibold text-white">
-        เปิดรับสมัครทัวร์นาเมนต์ใหม่ (Open Registration)
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2">
-          <label className="block text-xs text-zinc-400 mb-1">
-            ชื่อรายการแข่งขัน
-          </label>
-          <input
-            name="name"
-            placeholder="เช่น Bang Phra Campus Cup 2026"
-            required
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
-          />
-        </div>
-
+    <div className="border border-zinc-800 bg-zinc-900/30 p-5 mb-8">
+      <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
         <div>
-          <label className="block text-xs text-zinc-400 mb-1">
-            เกมที่ใช้แข่ง
-          </label>
-          <select
-            name="game"
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+          <span
+            className="font-mono text-[10px] font-semibold tracking-[0.18em] uppercase text-amber-400 block"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
           >
-            <option value="CS2">Counter-Strike 2</option>
-            <option value="VALORANT">Valorant</option>
-            <option value="DOTA2">Dota 2</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs text-zinc-400 mb-1">
-            โควตาทีม / สมาชิกขั้นต่ำ
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              name="maxTeams"
-              defaultValue="4"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-            >
-              <option value={4}>4 ทีม</option>
-              <option value={8}>8 ทีม</option>
-            </select>
-            <select
-              name="minPlayers"
-              defaultValue="1"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-            >
-              <option value={1}>ขั้นต่ำ 1 คน</option>
-              <option value={5}>ขั้นต่ำ 5 คน</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-4 pt-1">
-        {state.message ? (
-          <p
-            className={`text-xs ${state.success ? "text-emerald-400" : "text-rose-400"}`}
-          >
-            {state.message}
-          </p>
-        ) : (
-          <span className="text-xs text-zinc-500">
-            เมื่อสร้างแล้ว หัวหน้าทีมต่างๆ จะกดส่งทีมสมัครเข้ามาได้ทันที
+            Organizer Panel
           </span>
-        )}
-
+          <h2 className="text-base font-bold text-white mt-0.5">
+            เปิดรับสมัครทัวร์นาเมนต์ใหม่ (Create Tournament)
+          </h2>
+        </div>
         <button
-          type="submit"
-          disabled={isPending}
-          className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white font-medium px-6 py-2 rounded-lg text-sm transition"
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="border border-zinc-800 hover:border-amber-500/50 text-zinc-400 hover:text-amber-300 font-mono text-xs uppercase tracking-widest px-3 py-1.5 transition-colors"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
         >
-          {isPending ? "กำลังเปิดรับสมัคร..." : "เปิดรับสมัครทัวร์นาเมนต์"}
+          {isOpen ? "[ ซ่อนฟอร์ม ▲ ]" : "[ + เปิดฟอร์มสร้างทัวร์นาเมนต์ ▼ ]"}
         </button>
       </div>
-    </form>
+
+      {isOpen && (
+        <form action={action} className="space-y-4 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="md:col-span-2">
+              <label
+                className="block font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                ชื่อรายการแข่งขัน (Tournament Name)
+              </label>
+              <input
+                name="name"
+                placeholder="เช่น VCT Challengers Thailand 2026"
+                required
+                className="w-full bg-zinc-950 border border-zinc-800 px-3 py-2 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/60"
+              />
+            </div>
+
+            <div>
+              <label
+                className="block font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                เกมที่ใช้แข่ง
+              </label>
+              <select
+                name="game"
+                className="w-full bg-zinc-950 border border-zinc-800 px-3 py-2 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500/60"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                <option value="CS2">Counter-Strike 2</option>
+                <option value="VALORANT">Valorant</option>
+                <option value="DOTA2">Dota 2</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                className="block font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                โควตาทีม / สมาชิกขั้นต่ำ
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  name="maxTeams"
+                  defaultValue="4"
+                  className="w-full bg-zinc-950 border border-zinc-800 px-2 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-amber-500/60"
+                  style={{ fontFamily: "var(--font-geist-mono)" }}
+                >
+                  <option value={4}>4 ทีม</option>
+                  <option value={8}>8 ทีม</option>
+                </select>
+                <select
+                  name="minPlayers"
+                  defaultValue="1"
+                  className="w-full bg-zinc-950 border border-zinc-800 px-2 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-amber-500/60"
+                  style={{ fontFamily: "var(--font-geist-mono)" }}
+                >
+                  <option value={1}>ขั้นต่ำ 1 คน</option>
+                  <option value={5}>ขั้นต่ำ 5 คน</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {state.message && (
+            <p
+              className={`font-mono text-xs ${
+                state.success ? "text-cyan-400" : "text-rose-400"
+              }`}
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {state.message}
+            </p>
+          )}
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="border border-amber-500/60 bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 font-mono text-xs font-bold uppercase tracking-widest px-5 py-2 transition-colors disabled:opacity-40"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {isPending ? "กำลังเปิดรับสมัคร..." : "ยืนยันสร้างรายการแข่งขัน →"}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }
 
@@ -152,33 +184,35 @@ export function TournamentRegistrationBox({
   const isFull = registeredTeams.length >= maxTeams;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* แถบควบคุมสำหรับ Organizer */}
       {isOrganizer && (
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-950 border border-amber-500/20 rounded-xl p-4">
-          <div className="text-xs text-zinc-300">
-            <span className="font-semibold text-amber-400">
-              Organizer Controls:{" "}
+        <div className="flex flex-wrap items-center justify-between gap-3 border border-amber-500/30 bg-amber-950/20 px-4 py-3">
+          <div className="font-mono text-xs text-zinc-300" style={{ fontFamily: "var(--font-geist-mono)" }}>
+            <span className="font-bold text-amber-400 tracking-wider uppercase mr-2">
+              [ORGANIZER]
             </span>
-            รับสมัครทีมแล้ว {registeredTeams.length} / {maxTeams} ทีม
+            ลงทะเบียนแล้ว: {registeredTeams.length} / {maxTeams} ทีม
           </div>
           <div className="flex items-center gap-2">
             {!isFull && (
               <button
                 type="button"
                 onClick={() => fillDemoRegistrations(tournamentId)}
-                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-1.5 rounded-lg transition"
+                className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-mono text-[11px] uppercase tracking-wider px-3 py-1 transition-colors"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
               >
-                + เติมทีมตัวอย่างให้เต็ม
+                + เติมทีมตัวอย่าง
               </button>
             )}
             <button
               type="button"
               disabled={!isFull}
               onClick={() => startTournamentBracket(tournamentId)}
-              className="text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-semibold px-4 py-1.5 rounded-lg transition"
+              className="border border-cyan-500/60 bg-cyan-950/30 hover:bg-cyan-900/40 disabled:opacity-30 text-cyan-300 font-mono text-[11px] font-bold uppercase tracking-wider px-4 py-1 transition-colors"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
             >
-              ปิดรับสมัคร & สุ่มสาย Bracket →
+              ปิดรับสมัคร &amp; รันสาย Bracket →
             </button>
           </div>
         </div>
@@ -188,34 +222,40 @@ export function TournamentRegistrationBox({
       {!isFull && unregisteredCaptainTeams.length > 0 && (
         <form
           action={action}
-          className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2"
+          className="border border-zinc-800 bg-zinc-950 px-4 py-3 flex flex-wrap items-center gap-3"
         >
           <input type="hidden" name="tournamentId" value={tournamentId} />
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-xs font-medium text-zinc-300">
-              ส่งทีมของคุณลงแข่ง (ขั้นต่ำ {minPlayers} คน):
-            </span>
-            <select
-              name="teamId"
-              className="flex-1 min-w-50 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white"
-            >
-              {unregisteredCaptainTeams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  [{t.tag}] {t.name} ({t.memberCount} คน)
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition"
-            >
-              {isPending ? "กำลังสมัคร..." : "สมัครเข้าแข่งขัน"}
-            </button>
-          </div>
+          <span
+            className="font-mono text-xs text-zinc-400"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            ส่งทีมลงแข่ง (ขั้นต่ำ {minPlayers} คน):
+          </span>
+          <select
+            name="teamId"
+            className="flex-1 min-w-[200px] bg-zinc-900 border border-zinc-800 px-3 py-1.5 font-mono text-xs text-cyan-300 focus:outline-none focus:border-cyan-500/60"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            {unregisteredCaptainTeams.map((t) => (
+              <option key={t.id} value={t.id}>
+                [{t.tag}] {t.name} ({t.memberCount} สมาชิก)
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="border border-cyan-500/60 bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-300 font-mono text-xs font-bold uppercase tracking-widest px-4 py-1.5 transition-colors disabled:opacity-40"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            {isPending ? "กำลังสมัคร..." : "สมัครเข้าร่วม"}
+          </button>
           {state.message && (
             <p
-              className={`text-xs ${state.success ? "text-emerald-400" : "text-rose-400"}`}
+              className={`w-full font-mono text-xs mt-1 ${
+                state.success ? "text-cyan-400" : "text-rose-400"
+              }`}
+              style={{ fontFamily: "var(--font-geist-mono)" }}
             >
               {state.message}
             </p>
@@ -225,30 +265,49 @@ export function TournamentRegistrationBox({
 
       {/* รายชื่อทีมที่สมัครเข้ามาแล้ว */}
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
-          รายชื่อทีมที่ลงทะเบียน ({registeredTeams.length} / {maxTeams})
-        </h3>
+        <span
+          className="font-mono text-[9px] font-semibold tracking-[0.18em] uppercase text-zinc-500 block mb-2"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          Registered Teams ({registeredTeams.length} / {maxTeams})
+        </span>
+
         {registeredTeams.length === 0 ? (
-          <p className="text-xs text-zinc-500 bg-zinc-950/60 border border-dashed border-zinc-800 rounded-lg p-6 text-center">
-            ยังไม่มีทีมสมัครเข้าร่วมในขณะนี้
-          </p>
+          <div className="border border-dashed border-zinc-800 p-6 text-center">
+            <span
+              className="font-mono text-xs text-zinc-600 uppercase tracking-widest"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Waiting for team registrations
+            </span>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
             {registeredTeams.map((team, idx) => {
               const isMyTeam = myRegisteredTeams.some((m) => m.id === team.id);
               return (
                 <div
                   key={team.id}
-                  className={`flex items-center justify-between bg-zinc-950 border rounded-lg px-3 py-2.5 text-xs ${
-                    isMyTeam ? "border-emerald-500/40" : "border-zinc-800"
+                  className={`flex items-center justify-between border px-3 py-2 text-xs ${
+                    isMyTeam
+                      ? "border-cyan-500/40 bg-cyan-950/20"
+                      : "border-zinc-800 bg-zinc-950"
                   }`}
                 >
                   <div className="truncate">
-                    <span className="text-zinc-500 mr-1.5">#{idx + 1}</span>
-                    <span className="text-amber-400 font-bold mr-1">
+                    <span
+                      className="font-mono text-zinc-600 mr-1.5"
+                      style={{ fontFamily: "var(--font-geist-mono)" }}
+                    >
+                      #{idx + 1}
+                    </span>
+                    <span
+                      className="font-mono text-cyan-400 font-bold mr-1"
+                      style={{ fontFamily: "var(--font-geist-mono)" }}
+                    >
                       [{team.tag}]
                     </span>
-                    <span className="text-zinc-200">{team.name}</span>
+                    <span className="text-zinc-200 truncate">{team.name}</span>
                   </div>
                   {isMyTeam && (
                     <button
@@ -256,9 +315,10 @@ export function TournamentRegistrationBox({
                       onClick={() =>
                         withdrawTeamFromTournament(tournamentId, team.id)
                       }
-                      className="text-[11px] text-rose-400 hover:underline ml-2 shrink-0"
+                      className="font-mono text-[10px] text-zinc-600 hover:text-rose-400 uppercase tracking-wider ml-2 shrink-0 transition-colors"
+                      style={{ fontFamily: "var(--font-geist-mono)" }}
                     >
-                      ถอนตัว
+                      [ถอนตัว]
                     </button>
                   )}
                 </div>
@@ -280,7 +340,7 @@ export function MatchScoreForm({ matchId }: { matchId: string }) {
   return (
     <form
       action={action}
-      className="mt-2 pt-2 border-t border-zinc-800/80 space-y-1.5"
+      className="mt-2 pt-2 border-t border-zinc-800/80 flex items-center justify-between gap-2"
     >
       <input type="hidden" name="matchId" value={matchId} />
       <div className="flex items-center gap-1.5">
@@ -290,29 +350,42 @@ export function MatchScoreForm({ matchId }: { matchId: string }) {
           min={0}
           defaultValue={0}
           aria-label="Score Team A"
-          className="w-12 bg-zinc-900 border border-zinc-700 rounded px-1.5 py-1 text-center text-xs text-white"
+          className="w-10 bg-zinc-900 border border-zinc-800 px-1 py-0.5 text-center font-mono text-xs text-white focus:outline-none focus:border-cyan-500"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
           required
         />
-        <span className="text-zinc-500 text-xs">:</span>
+        <span
+          className="font-mono text-zinc-600 text-xs"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          :
+        </span>
         <input
           type="number"
           name="scoreB"
           min={0}
           defaultValue={0}
           aria-label="Score Team B"
-          className="w-12 bg-zinc-900 border border-zinc-700 rounded px-1.5 py-1 text-center text-xs text-white"
+          className="w-10 bg-zinc-900 border border-zinc-800 px-1 py-0.5 text-center font-mono text-xs text-white focus:outline-none focus:border-cyan-500"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
           required
         />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="ml-auto bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-medium px-2.5 py-1 rounded transition"
-        >
-          {isPending ? "..." : "จบแมตช์"}
-        </button>
       </div>
+      <button
+        type="submit"
+        disabled={isPending}
+        className="border border-zinc-800 hover:border-cyan-500/50 text-zinc-400 hover:text-cyan-300 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 transition-colors disabled:opacity-40"
+        style={{ fontFamily: "var(--font-geist-mono)" }}
+      >
+        {isPending ? "…" : "บันทึกผล"}
+      </button>
       {state.message && !state.success && (
-        <p className="text-[11px] text-rose-400">{state.message}</p>
+        <span
+          className="font-mono text-[10px] text-rose-400"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          {state.message}
+        </span>
       )}
     </form>
   );
@@ -326,10 +399,15 @@ export function DeleteTournamentButton({
   return (
     <button
       type="button"
-      onClick={() => deleteTournament(tournamentId)}
-      className="text-xs text-zinc-500 hover:text-rose-400 transition"
+      onClick={() => {
+        if (confirm("ยืนยันการลบทัวร์นาเมนต์นี้?")) {
+          deleteTournament(tournamentId);
+        }
+      }}
+      className="font-mono text-[10px] text-zinc-600 hover:text-rose-400 tracking-widest uppercase transition-colors"
+      style={{ fontFamily: "var(--font-geist-mono)" }}
     >
-      ลบทัวร์นาเมนต์
+      [ DELETE TOURNAMENT ]
     </button>
   );
 }

@@ -15,6 +15,7 @@ import {
 const initialState: ActionResponse = { success: false, message: "" };
 
 export function TeamForms({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const [activeTab, setActiveTab] = useState<"create" | "join">("create");
   const [createState, createAction, isCreating] = useActionState(
     createTeam,
     initialState,
@@ -26,117 +27,168 @@ export function TeamForms({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   if (!isLoggedIn) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-10 flex flex-wrap items-center justify-between gap-4">
+      <div className="border border-zinc-800 bg-zinc-900/40 p-5 mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-white">
+          <span
+            className="font-mono text-[10px] font-semibold tracking-[0.18em] uppercase text-zinc-500 block mb-1"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            Authentication Required
+          </span>
+          <p className="text-sm text-zinc-200 font-medium">
             เข้าสู่ระบบเพื่อสร้างทีมหรือเข้าร่วมทีม
-          </h2>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            บัญชีของคุณจะถูกผูกกับรายชื่อผู้เล่น (Roster)
-            และสิทธิ์หัวหน้าทีมโดยอัตโนมัติ
+          </p>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            บัญชีของคุณจะถูกผูกกับ Roster และสิทธิ์กัปตันทีมโดยอัตโนมัติ
           </p>
         </div>
         <Link
           href="/login"
-          className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-4 py-2.5 rounded-lg transition"
+          className="border border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-950/40 text-cyan-400 font-mono text-xs font-semibold px-4 py-2 uppercase tracking-widest transition-colors"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
         >
-          ไปหน้าเข้าสู่ระบบ →
+          [ เข้าสู่ระบบ → ]
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-      {/* ฟอร์มสร้างทีม */}
-      <form
-        action={createAction}
-        className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4"
-      >
-        <h2 className="text-lg font-semibold text-white">
-          สร้างทีมใหม่ (Create Team)
-        </h2>
+    <div className="border border-zinc-800 bg-zinc-900/30 p-5 mb-8">
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3 mb-4">
+        <button
+          type="button"
+          onClick={() => setActiveTab("create")}
+          className={`font-mono text-xs font-bold uppercase tracking-wider px-3 py-1.5 transition-colors border ${
+            activeTab === "create"
+              ? "border-cyan-500/60 bg-cyan-950/30 text-cyan-300"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
+          }`}
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          + สร้างทีมใหม่
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("join")}
+          className={`font-mono text-xs font-bold uppercase tracking-wider px-3 py-1.5 transition-colors border ${
+            activeTab === "join"
+              ? "border-cyan-500/60 bg-cyan-950/30 text-cyan-300"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
+          }`}
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          # เข้าร่วมทีมด้วย Code
+        </button>
+      </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="col-span-2">
-            <label className="block text-xs text-zinc-400 mb-1">
-              ชื่อทีม (Team Name)
-            </label>
-            <input
-              name="name"
-              placeholder="เช่น Team Liquid, Bacon Time"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-              required
-            />
+      {activeTab === "create" ? (
+        /* ฟอร์มสร้างทีม */
+        <form action={createAction} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
+              <label
+                className="block font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                ชื่อทีม (Team Name)
+              </label>
+              <input
+                name="name"
+                placeholder="เช่น Paper Rex, Fnatic"
+                className="w-full bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:border-cyan-500/60 transition-colors"
+                required
+              />
+            </div>
+            <div>
+              <label
+                className="block font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+              >
+                Tag (สูงสุด 5 ตัว)
+              </label>
+              <input
+                name="tag"
+                maxLength={5}
+                placeholder="PRX"
+                className="w-full bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-cyan-400 font-mono font-bold uppercase placeholder:text-zinc-700 focus:outline-none focus:border-cyan-500/60 transition-colors"
+                style={{ fontFamily: "var(--font-geist-mono)" }}
+                required
+              />
+            </div>
           </div>
+
+          {createState.message && (
+            <p
+              className={`font-mono text-xs ${
+                createState.success ? "text-cyan-400" : "text-rose-400"
+              }`}
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {createState.message}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between pt-1">
+            <span
+              className="font-mono text-[10px] text-zinc-600 uppercase tracking-widest"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              * คุณจะได้รับสิทธิ์ Captain อัตโนมัติ
+            </span>
+            <button
+              type="submit"
+              disabled={isCreating}
+              className="border border-cyan-500/60 bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-300 font-mono text-xs font-bold uppercase tracking-widest px-5 py-2 transition-colors disabled:opacity-40"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {isCreating ? "กำลังสร้าง..." : "สร้างทีมใหม่ →"}
+            </button>
+          </div>
+        </form>
+      ) : (
+        /* ฟอร์มเข้าร่วมทีม */
+        <form action={joinAction} className="space-y-4">
           <div>
-            <label className="block text-xs text-zinc-400 mb-1">
-              Tag (สูงสุด 5 ตัว)
+            <label
+              className="block font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Invite Code จากหัวหน้าทีม
             </label>
             <input
-              name="tag"
-              maxLength={5}
-              placeholder="เช่น TL"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white uppercase focus:outline-none focus:border-emerald-500"
+              name="inviteCode"
+              placeholder="วางรหัสเชิญ เช่น a8f9e2b1..."
+              className="w-full bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-cyan-300 font-mono placeholder:text-zinc-700 focus:outline-none focus:border-cyan-500/60 transition-colors"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
               required
             />
           </div>
-        </div>
 
-        {createState.message && (
-          <p
-            className={`text-xs ${createState.success ? "text-emerald-400" : "text-rose-400"}`}
-          >
-            {createState.message}
-          </p>
-        )}
+          {joinState.message && (
+            <p
+              className={`font-mono text-xs ${
+                joinState.success ? "text-cyan-400" : "text-rose-400"
+              }`}
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {joinState.message}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          disabled={isCreating}
-          className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-medium py-2 rounded-lg text-sm transition"
-        >
-          {isCreating ? "กำลังสร้างทีม..." : "สร้างทีม (คุณจะเป็น Captain)"}
-        </button>
-      </form>
-
-      {/* ฟอร์มเข้าร่วมทีม */}
-      <form
-        action={joinAction}
-        className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4"
-      >
-        <h2 className="text-lg font-semibold text-white">
-          เข้าร่วมทีมด้วย Invite Code
-        </h2>
-
-        <div>
-          <label className="block text-xs text-zinc-400 mb-1">
-            Invite Code
-          </label>
-          <input
-            name="inviteCode"
-            placeholder="วางรหัสเชิญเข้าทีมที่นี่"
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-indigo-500"
-            required
-          />
-        </div>
-
-        {joinState.message && (
-          <p
-            className={`text-xs ${joinState.success ? "text-emerald-400" : "text-rose-400"}`}
-          >
-            {joinState.message}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={isJoining}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-2 rounded-lg text-sm transition"
-        >
-          {isJoining ? "กำลังตรวจสอบ..." : "เข้าร่วมทีม"}
-        </button>
-      </form>
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={isJoining}
+              className="border border-cyan-500/60 bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-300 font-mono text-xs font-bold uppercase tracking-widest px-5 py-2 transition-colors disabled:opacity-40"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              {isJoining ? "กำลังตรวจสอบ..." : "ยืนยันเข้าร่วมทีม →"}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }
@@ -157,24 +209,38 @@ export function InviteCodeBox({
   };
 
   return (
-    <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs">
-      <span className="text-zinc-400">Invite Code:</span>
-      <code className="text-amber-400 font-mono select-all">{inviteCode}</code>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="ml-auto text-zinc-300 hover:text-white bg-zinc-800 px-2 py-0.5 rounded"
+    <div className="flex items-center gap-2 border border-zinc-800 bg-zinc-950 px-3 py-1.5">
+      <span
+        className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 select-none"
+        style={{ fontFamily: "var(--font-geist-mono)" }}
       >
-        {copied ? "Copied!" : "Copy"}
-      </button>
-      <button
-        type="button"
-        onClick={() => regenerateInviteCode(teamId)}
-        title="สร้างโค้ดเชิญใหม่"
-        className="text-zinc-400 hover:text-amber-400 px-1"
+        CODE:
+      </span>
+      <code
+        className="font-mono text-xs text-amber-300 font-semibold tracking-wider select-all truncate"
+        style={{ fontFamily: "var(--font-geist-mono)" }}
       >
-        ↻
-      </button>
+        {inviteCode}
+      </code>
+      <div className="ml-auto flex items-center gap-1.5 shrink-0">
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 transition-colors"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          {copied ? "COPIED" : "COPY"}
+        </button>
+        <button
+          type="button"
+          onClick={() => regenerateInviteCode(teamId)}
+          title="สร้างโค้ดเชิญใหม่"
+          className="border border-zinc-800 hover:border-amber-500/50 text-zinc-500 hover:text-amber-400 font-mono text-xs px-1.5 py-0.5 transition-colors"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
+        >
+          ↻
+        </button>
+      </div>
     </div>
   );
 }
@@ -189,11 +255,12 @@ export function MemberControls({
   isSelf: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 shrink-0">
       <select
         value={currentRole}
         onChange={(e) => updateMemberRole(memberId, e.target.value)}
-        className="bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 rounded px-2 py-1"
+        className="bg-zinc-950 border border-zinc-800 text-[10px] font-mono text-zinc-300 uppercase tracking-wider px-2 py-1 focus:outline-none focus:border-cyan-500/60"
+        style={{ fontFamily: "var(--font-geist-mono)" }}
       >
         <option value="CAPTAIN">CAPTAIN</option>
         <option value="PLAYER">PLAYER</option>
@@ -203,9 +270,10 @@ export function MemberControls({
         <button
           type="button"
           onClick={() => removeMember(memberId)}
-          className="text-xs text-rose-400 hover:text-rose-300 px-1.5 py-0.5 rounded hover:bg-rose-950/50"
+          className="font-mono text-[10px] text-zinc-600 hover:text-rose-400 hover:border-rose-500/30 border border-transparent px-1.5 py-0.5 uppercase tracking-wider transition-colors"
+          style={{ fontFamily: "var(--font-geist-mono)" }}
         >
-          ลบ
+          KICK
         </button>
       )}
     </div>
@@ -216,10 +284,15 @@ export function DeleteTeamButton({ teamId }: { teamId: string }) {
   return (
     <button
       type="button"
-      onClick={() => deleteTeam(teamId)}
-      className="text-xs text-zinc-500 hover:text-rose-400 transition"
+      onClick={() => {
+        if (confirm("ยืนยันการลบทีมนี้?")) {
+          deleteTeam(teamId);
+        }
+      }}
+      className="font-mono text-[10px] text-zinc-600 hover:text-rose-400 tracking-widest uppercase transition-colors"
+      style={{ fontFamily: "var(--font-geist-mono)" }}
     >
-      ลบทีม
+      [ DISBAND TEAM ]
     </button>
   );
 }
